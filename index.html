@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sonoria - Premium Music Streaming</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- YouTube IFrame Player API (Loaded dynamically in player.js) -->
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="dark-theme">
+
+  <div class="app-layout">
+    
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+            <span class="bar bar-4"></span>
+          </div>
+          <span class="logo-text">Sonoria</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item active" data-view="home">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+          </li>
+          <li class="nav-item" data-view="search">
+            <i data-lucide="search"></i>
+            <span>Search</span>
+          </li>
+          <li class="nav-item" data-view="liked">
+            <i data-lucide="heart"></i>
+            <span>Liked Songs</span>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Playlists Section -->
+      <div class="sidebar-playlists-container">
+        <div class="playlists-header">
+          <span>My Playlists</span>
+          <button id="btn-create-playlist" title="Create Playlist">
+            <i data-lucide="plus"></i>
+          </button>
+        </div>
+        <ul id="sidebar-playlists" class="playlists-list">
+          <!-- Dynamically populated -->
+        </ul>
+      </div>
+
+
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Bar / Navigation -->
+      <header class="top-bar">
+        <button class="btn-hamburger" id="btn-hamburger" title="Menu">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="search-bar-wrapper" id="top-search-wrapper">
+          <i data-lucide="search"></i>
+          <input type="text" id="input-search" placeholder="What do you want to listen to?" autocomplete="off">
+          <button id="btn-clear-search" class="hidden">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="header-user-badge" id="header-user-badge">
+          <span class="user-avatar" id="user-avatar">G</span>
+          <span class="user-name" id="user-name">Guest User</span>
+          <i data-lucide="chevron-down" class="user-badge-chevron"></i>
+          
+          <div class="user-dropdown-menu" id="user-dropdown-menu">
+            <button class="dropdown-item" id="btn-dropdown-signin">
+              <i data-lucide="log-in"></i> Sign In / Sign Up
+            </button>
+            <button class="dropdown-item hidden" id="btn-dropdown-logout">
+              <i data-lucide="log-out"></i> Log Out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Views Container -->
+      <div class="view-content">
+
+        <!-- HOME VIEW -->
+        <section id="view-home" class="view-pane active">
+          <div class="hero-banner">
+            <div class="hero-overlay"></div>
+            <div class="hero-body">
+              <span class="hero-tag">WELCOME TO SONORIA</span>
+              <h1>Infinite Music Library</h1>
+              <p>Search, play, stream, and toggle between Audio and Video seamlessly using the power of YouTube API.</p>
+              <button class="btn btn-primary" id="hero-play-btn">
+                <i data-lucide="play" class="fill"></i> Start Listening
+              </button>
+            </div>
+          </div>
+
+          <div class="section-container">
+            <h2>Select Your Vibe</h2>
+            <div class="vibes-grid">
+              <div class="vibe-card" data-query="Phonk Music">
+                <div class="vibe-card-bg phonk-bg"></div>
+                <div class="vibe-card-content">
+                  <i data-lucide="zap"></i>
+                  <span>Drift Phonk</span>
+                </div>
+              </div>
+              <div class="vibe-card" data-query="Punjabi Hits">
+                <div class="vibe-card-bg punjabi-bg"></div>
+                <div class="vibe-card-content">
+                  <i data-lucide="music-4"></i>
+                  <span>Punjabi Hits</span>
+                </div>
+              </div>
+              <div class="vibe-card" data-query="Synthwave Music">
+                <div class="vibe-card-bg synth-bg"></div>
+                <div class="vibe-card-content">
+                  <i data-lucide="sunset"></i>
+                  <span>Synthwave</span>
+                </div>
+              </div>
+              <div class="vibe-card" data-query="Gym Workout Music">
+                <div class="vibe-card-bg gym-bg"></div>
+                <div class="vibe-card-content">
+                  <i data-lucide="dumbbell"></i>
+                  <span>Gym Beats</span>
+                </div>
+              </div>
+              <div class="vibe-card" data-query="90s Pop Global Hits">
+                <div class="vibe-card-bg hits-bg"></div>
+                <div class="vibe-card-content">
+                  <i data-lucide="disc"></i>
+                  <span>90s Nostalgia</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-container">
+            <h2>Trending on Sonoria</h2>
+            <div class="songs-grid" id="trending-songs-grid">
+              <!-- Dynamically populated with skeleton loaders -->
+            </div>
+          </div>
+        </section>
+
+        <!-- SEARCH VIEW -->
+        <section id="view-search" class="view-pane">
+          <div class="search-view-placeholder" id="search-prompt">
+            <i data-lucide="search" class="search-huge-icon"></i>
+            <h2>Search Sonoria</h2>
+            <p>Find your favorite songs, artists, channels, and playlists from YouTube.</p>
+          </div>
+          
+          <div class="search-results-container hidden" id="search-results-area">
+            <div class="results-header">
+              <h2>Top Search Results</h2>
+            </div>
+            <div class="songs-grid" id="search-songs-grid">
+              <!-- Results -->
+            </div>
+          </div>
+        </section>
+
+        <!-- LIKED SONGS VIEW -->
+        <section id="view-liked" class="view-pane">
+          <div class="playlist-banner-header liked-banner">
+            <div class="playlist-banner-bg"></div>
+            <div class="playlist-banner-content">
+              <div class="playlist-art liked-art">
+                <i data-lucide="heart" class="fill"></i>
+              </div>
+              <div class="playlist-info">
+                <span>PLAYLIST</span>
+                <h1>Liked Songs</h1>
+                <p><span id="liked-count">0</span> songs • Curated by you</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="playlist-actions">
+            <button class="btn-play-all" id="btn-play-liked">
+              <i data-lucide="play" class="fill"></i> Play
+            </button>
+          </div>
+          
+          <div class="track-list" id="liked-track-list">
+            <!-- List of Liked Songs -->
+          </div>
+        </section>
+
+        <!-- CUSTOM PLAYLIST VIEW -->
+        <section id="view-playlist" class="view-pane">
+          <div class="playlist-banner-header">
+            <div class="playlist-banner-bg" id="playlist-bg-glow"></div>
+            <div class="playlist-banner-content">
+              <div class="playlist-art" id="playlist-art-display">
+                <i data-lucide="music"></i>
+              </div>
+              <div class="playlist-info">
+                <span>PLAYLIST</span>
+                <h1 id="playlist-title-display">Playlist Title</h1>
+                <p id="playlist-meta-display">0 songs</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="playlist-actions">
+            <button class="btn-play-all" id="btn-play-playlist">
+              <i data-lucide="play" class="fill"></i> Play
+            </button>
+            <button class="btn-delete-playlist" id="btn-delete-current-playlist">
+              <i data-lucide="trash-2"></i> Delete Playlist
+            </button>
+          </div>
+          
+          <div class="track-list" id="playlist-track-list">
+            <!-- List of Playlist Songs -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Right-Hand Side Details Panel ("Now Playing Details Panel") -->
+    <aside class="details-panel" id="details-panel">
+      <div class="details-panel-header">
+        <h3>Now Playing</h3>
+        <button id="btn-close-details" title="Close Panel">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="now-playing-visual-section">
+        <!-- YouTube Video Mode Container (shown only in video mode) -->
+        <div id="youtube-player-wrapper" class="mode-audio-only">
+          <!-- This div will receive the iframe when in video mode -->
+          <div id="youtube-video-display"></div>
+          <div class="video-overlay-controls">
+            <div class="video-overlay-badge"><i data-lucide="tv"></i> Video Mode</div>
+          </div>
+        </div>
+
+        <!-- Audio Mode Album Art & Visualizer representation -->
+        <div class="audio-only-visualizer-container" id="audio-visualizer-panel">
+          <div class="vinyl-wrapper">
+            <img id="vinyl-album-art" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Crect width='100' height='100' fill='%23121214'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%231db954' stroke-width='2' stroke-dasharray='4 4'/%3E%3Cpath d='M41 65V35l30-6v30' stroke='%231db954' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='35' cy='65' r='6' fill='%231db954'/%3E%3Ccircle cx='65' cy='59' r='6' fill='%231db954'/%3E%3C/svg%3E" alt="Album Art">
+            <div class="vinyl-center"></div>
+          </div>
+          <!-- Live Canvas Visualizer -->
+          <canvas id="visualizer-canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="now-playing-metadata">
+        <div class="meta-title-row">
+          <div>
+            <h4 id="details-song-title">No song playing</h4>
+            <p id="details-song-artist">Choose a song to start streaming</p>
+          </div>
+          <button id="details-btn-like" class="btn-icon">
+            <i data-lucide="heart"></i>
+          </button>
+        </div>
+        
+        <div class="playback-mode-toggle-card">
+          <span class="toggle-card-label">Playback Mode</span>
+          <div class="mode-switch-buttons">
+            <button id="btn-mode-audio" class="mode-btn active">
+              <i data-lucide="headphones"></i> Audio Only
+            </button>
+            <button id="btn-mode-video" class="mode-btn">
+              <i data-lucide="video"></i> Video Playback
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Play Queue Panel inside right sidebar -->
+      <div class="queue-section">
+        <div class="queue-header">
+          <span>Play Queue</span>
+          <button id="btn-clear-queue" class="btn-link">Clear</button>
+        </div>
+        <ul class="queue-list" id="queue-items-list">
+          <li class="queue-empty">Queue is empty</li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" data-view="home">
+      <i data-lucide="home"></i>
+      <span>Home</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="search">
+      <i data-lucide="search"></i>
+      <span>Search</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="liked">
+      <i data-lucide="heart"></i>
+      <span>Liked</span>
+    </button>
+  </nav>
+
+  <!-- Bottom Player Bar -->
+  <footer class="player-bar">
+    <!-- Left: Track Details -->
+    <div class="player-left">
+      <div class="player-track-art">
+        <img id="player-album-art" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='5 3 19 12 5 21 5 3'/%3E%3C/svg%3E" alt="Art">
+      </div>
+      <div class="player-track-info">
+        <div class="scroll-container">
+          <span class="track-title" id="player-song-title">Not Playing</span>
+        </div>
+        <span class="track-artist" id="player-song-artist">-</span>
+      </div>
+      <button id="player-btn-like" class="btn-icon">
+        <i data-lucide="heart"></i>
+      </button>
+    </div>
+
+    <!-- Center: Playback Controls & Timeline -->
+    <div class="player-center">
+      <div class="player-controls">
+        <button id="player-btn-shuffle" class="btn-icon" title="Shuffle">
+          <i data-lucide="shuffle"></i>
+        </button>
+        <button id="player-btn-prev" class="btn-icon" title="Previous">
+          <i data-lucide="skip-back"></i>
+        </button>
+        <button id="player-btn-play" class="btn-play-pause" title="Play">
+          <i data-lucide="play" class="fill"></i>
+        </button>
+        <button id="player-btn-next" class="btn-icon" title="Next">
+          <i data-lucide="skip-forward"></i>
+        </button>
+        <button id="player-btn-repeat" class="btn-icon" title="Repeat">
+          <i data-lucide="repeat"></i>
+        </button>
+      </div>
+
+      <div class="player-timeline">
+        <span class="time-stamp" id="player-time-current">0:00</span>
+        <div class="progress-bar-wrapper">
+          <input type="range" id="progress-slider" min="0" max="100" value="0" step="0.1">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <span class="time-stamp" id="player-time-duration">0:00</span>
+      </div>
+    </div>
+
+    <!-- Right: Extra Controls (Volume, Queue, Mode) -->
+    <div class="player-right">
+      <button id="player-btn-quick-mode" class="btn-icon" title="Toggle Audio/Video">
+        <i data-lucide="headphones" id="quick-mode-icon"></i>
+      </button>
+      <button id="player-btn-toggle-details" class="btn-icon active" title="Toggle Detail Panel">
+        <i data-lucide="layout-sidebar"></i>
+      </button>
+      <div class="volume-control-wrapper">
+        <button id="player-btn-mute" class="btn-icon" title="Mute">
+          <i data-lucide="volume-2"></i>
+        </button>
+        <div class="volume-slider-wrapper">
+          <input type="range" id="volume-slider" min="0" max="100" value="50">
+          <div class="volume-bar-fill" id="volume-fill"></div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Create Playlist Modal -->
+  <div class="modal-backdrop" id="playlist-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Create Playlist</h3>
+        <button class="modal-close" id="btn-close-playlist-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label for="input-playlist-name">Playlist Name</label>
+          <input type="text" id="input-playlist-name" placeholder="My Awesome Playlist..." autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="input-playlist-desc">Description (Optional)</label>
+          <textarea id="input-playlist-desc" rows="3" placeholder="A collection of favorite songs..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-playlist-modal">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-playlist">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Login / Signup) -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal auth-modal-content">
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Sign In to Sonoria</h3>
+        <button class="modal-close" id="btn-close-auth-modal">&times;</button>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login">Sign In</button>
+        <button class="auth-tab" id="tab-signup">Register</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="auth-form" autocomplete="off">
+          <!-- Username (Signup only) -->
+          <div class="input-group hidden" id="group-auth-username">
+            <label for="input-auth-username">Username</label>
+            <input type="text" id="input-auth-username" placeholder="Choose a username..." autocomplete="off">
+          </div>
+          
+          <!-- Email -->
+          <div class="input-group">
+            <label for="input-auth-email">Email Address</label>
+            <input type="email" id="input-auth-email" placeholder="name@example.com" required autocomplete="off">
+          </div>
+          
+          <!-- Password -->
+          <div class="input-group">
+            <label for="input-auth-password">Password</label>
+            <input type="password" id="input-auth-password" placeholder="At least 6 characters..." required autocomplete="off">
+          </div>
+
+          <p class="auth-error-msg hidden" id="auth-error-message"></p>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-auth-modal">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-auth">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vibe Choice Modal (Hindi vs English for 90s Nostalgia) -->
+  <div class="modal-backdrop" id="vibe-choice-modal">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3>90s Nostalgia Selection</h3>
+        <button class="modal-close" id="btn-close-vibe-choice-modal">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; align-items: center; padding: 24px 20px;">
+        <p style="color: var(--text-muted); font-size: 14px; text-align: center; margin-bottom: 8px; line-height: 1.5;">
+          Select the language/genre for your 90s Nostalgia playlist. Songs will be searched and displayed in descending order of YouTube views.
+        </p>
+        <button class="btn btn-primary" id="btn-vibe-choice-hindi" style="width: 100%; justify-content: center; padding: 14px; background: linear-gradient(135deg, #ffa801, #e17055); color: #fff; box-shadow: none; font-size: 15px;">
+          <i data-lucide="music" style="width: 16px; height: 16px; margin-right: 8px;"></i> Hindi (Bollywood 90s)
+        </button>
+        <button class="btn btn-primary" id="btn-vibe-choice-english" style="width: 100%; justify-content: center; padding: 14px; background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; box-shadow: none; font-size: 15px;">
+          <i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> English (90s Pop/Rock Hits)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden YouTube Player (off-screen, always active for audio playback) -->
+  <div id="youtube-offscreen-player" aria-hidden="true">
+    <div id="youtube-iframe-container"></div>
+  </div>
+
+  <!-- App Code entry -->
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>
