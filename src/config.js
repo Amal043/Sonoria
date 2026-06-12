@@ -2,17 +2,20 @@
 // Keys are loaded from environment variables (set in .env file)
 // Vite injects VITE_ prefixed vars at build time via import.meta.env
 
+// Safe access to Vite environment variables (fallback to empty object if not running under Vite)
+const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
+
 const envKeys = [
-  import.meta.env.VITE_YT_KEY_1,
-  import.meta.env.VITE_YT_KEY_2,
-  import.meta.env.VITE_YT_KEY_3,
-  import.meta.env.VITE_YT_KEY_4,
-  import.meta.env.VITE_YT_KEY_5,
-  import.meta.env.VITE_YT_KEY_6,
-  import.meta.env.VITE_YT_KEY_7,
-  import.meta.env.VITE_YT_KEY_8,
-  import.meta.env.VITE_YT_KEY_9,
-  import.meta.env.VITE_YT_KEY_10
+  env.VITE_YT_KEY_1,
+  env.VITE_YT_KEY_2,
+  env.VITE_YT_KEY_3,
+  env.VITE_YT_KEY_4,
+  env.VITE_YT_KEY_5,
+  env.VITE_YT_KEY_6,
+  env.VITE_YT_KEY_7,
+  env.VITE_YT_KEY_8,
+  env.VITE_YT_KEY_9,
+  env.VITE_YT_KEY_10
 ];
 
 // Filter out any undefined/empty keys
