@@ -221,6 +221,102 @@ app.post('/api/user/sync', authenticateToken, async (req, res) => {
 });
 
 // ----------------------------------------------------
+// SECURE YOUTUBE API PROXY ENDPOINTS (KEEPS KEYS SECURE ON BACKEND)
+// ----------------------------------------------------
+const YOUTUBE_KEYS = [
+  process.env.VITE_YT_KEY_1,
+  process.env.VITE_YT_KEY_2,
+  process.env.VITE_YT_KEY_3,
+  process.env.VITE_YT_KEY_4,
+  process.env.VITE_YT_KEY_5,
+  process.env.VITE_YT_KEY_6,
+  process.env.VITE_YT_KEY_7,
+  process.env.VITE_YT_KEY_8,
+  process.env.VITE_YT_KEY_9,
+  process.env.VITE_YT_KEY_10
+].filter(key => key && key.trim().length > 0);
+
+let activeKeyIndex = 0;
+
+function getActiveYoutubeKey() {
+  if (YOUTUBE_KEYS.length === 0) return null;
+  return YOUTUBE_KEYS[activeKeyIndex];
+}
+
+function rotateYoutubeKey() {
+  if (YOUTUBE_KEYS.length <= 1) return;
+  const oldIndex = activeKeyIndex;
+  activeKeyIndex = (activeKeyIndex + 1) % YOUTUBE_KEYS.length;
+  console.warn(`[Sonoria Server] YouTube API Key Rotated: Index ${oldIndex} -> ${activeKeyIndex}`);
+}
+
+async function fetchFromYoutube(endpoint, params = {}) {
+  if (YOUTUBE_KEYS.length === 0) {
+    throw new Error('No YouTube API keys configured on backend server environment.');
+  }
+
+  let attempts = 0;
+  const maxAttempts = YOUTUBE_KEYS.length;
+
+  while (attempts < maxAttempts) {
+    const key = getActiveYoutubeKey();
+    const url = new URL(`https://www.googleapis.com/youtube/v3${endpoint}`);
+    
+    Object.entries(params).forEach(([k, v]) => {
+      url.searchParams.set(k, v);
+    });
+    url.searchParams.set('key', key);
+
+    try {
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn(`[Sonoria Server] YouTube API request failed with status ${response.status}. Key Index: ${activeKeyIndex}`);
+        
+        if (response.status === 403 || response.status === 429) {
+          rotateYoutubeKey();
+          attempts++;
+          continue;
+        } else {
+          throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        }
+      }
+      return await response.json();
+    } catch (error) {
+      console.warn(`[Sonoria Server] YouTube API call attempt ${attempts + 1} failed: ${error.message}`);
+      rotateYoutubeKey();
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new Error('All YouTube API keys on backend server have been exhausted/failed. Please try again later.');
+      }
+    }
+  }
+  throw new Error('YouTube request failed after rotation');
+}
+
+// Proxy YouTube search route
+app.get('/api/youtube/search', async (req, res) => {
+  try {
+    const data = await fetchFromYoutube('/search', req.query);
+    res.json(data);
+  } catch (error) {
+    console.error('[Server Error] YouTube Search Proxy:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Proxy YouTube video details route
+app.get('/api/youtube/videos', async (req, res) => {
+  try {
+    const data = await fetchFromYoutube('/videos', req.query);
+    res.json(data);
+  } catch (error) {
+    console.error('[Server Error] YouTube Videos Proxy:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ----------------------------------------------------
 // PRODUCTION BUILD STATIC SERVER FALLBACK
 // ----------------------------------------------------
 const distPath = path.join(__dirname, 'dist');

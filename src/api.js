@@ -2,6 +2,11 @@ import { getActiveKey, rotateKey, YOUTUBE_KEYS } from './config';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 
+// Dynamic API Base URL for Express backend.
+// Defaults to local proxy in dev, and automatically points to the Render backend when hosted on GitHub Pages.
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
+  || (typeof window !== 'undefined' && window.location.hostname.includes('github.io') ? 'https://sonoria-backend.onrender.com' : '');
+
 /**
  * Helper to parse ISO 8601 duration (e.g. PT4M13S -> 253 seconds)
  */
@@ -52,59 +57,29 @@ export function cleanSongTitle(title) {
 }
 
 /**
- * Standard fetch with automatic YouTube API Key Rotation
+ * Fetches YouTube data securely via our backend proxy
  */
 async function fetchWithKeyRotation(endpoint, params = {}) {
-  let attempts = 0;
-  const maxAttempts = YOUTUBE_KEYS.length;
-
-  while (attempts < maxAttempts) {
-    const key = getActiveKey();
-    const url = new URL(`${YOUTUBE_API_BASE}${endpoint}`);
-    
-    // Add all query parameters
-    Object.entries(params).forEach(([k, v]) => {
-      url.searchParams.set(k, v);
-    });
-    url.searchParams.set('key', key);
-
-    try {
-      const response = await fetch(url.toString());
-      
-      // Quota exceeded is usually 403 Forbidden with a specific reason.
-      // We'll treat 403, 429, or general non-OK status (except 400 Bad Request) as candidates for rotation.
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const isQuotaError = response.status === 403 && 
-          (errorData.error?.errors?.[0]?.reason === 'quotaExceeded' || 
-           errorData.error?.message?.includes('quota'));
-        
-        console.warn(`[Sonoria] API request failed with status ${response.status}. Reason: ${errorData.error?.message || 'Unknown'}`);
-        
-        if (response.status === 403 || response.status === 429) {
-          rotateKey();
-          attempts++;
-          continue;
-        } else {
-          // If it's another error, throw it
-          throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-        }
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.warn(`[Sonoria] API call attempt ${attempts + 1} failed: ${error.message}`);
-      // Rotate and try again
-      rotateKey();
-      attempts++;
-      
-      if (attempts >= maxAttempts) {
-        throw new Error('All YouTube API keys have been exhausted/failed. Please try again later.');
-      }
-    }
-  }
+  const baseUrl = API_BASE ? API_BASE : window.location.origin;
+  const url = new URL(`${baseUrl}/api/youtube${endpoint}`);
   
-  throw new Error('API request failed after rotation');
+  // Add all query parameters
+  Object.entries(params).forEach(([k, v]) => {
+    url.searchParams.set(k, v);
+  });
+
+  try {
+    const response = await fetch(url.toString());
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+    return data;
+  } catch (error) {
+    console.error(`[Sonoria] Secure backend YouTube proxy failed: ${error.message}`);
+    throw error;
+  }
 }
 
 /**
@@ -529,7 +504,7 @@ export async function fetchITunesArtwork(songName, artistName) {
  * Real API Login Request
  */
 export async function authLogin(email, password) {
-  const response = await fetch('/api/auth/login', {
+  const response = await fetch(`${API_BASE}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -545,7 +520,7 @@ export async function authLogin(email, password) {
  * Real API Signup Request
  */
 export async function authSignup(username, email, password) {
-  const response = await fetch('/api/auth/signup', {
+  const response = await fetch(`${API_BASE}/api/auth/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, email, password })
@@ -561,7 +536,7 @@ export async function authSignup(username, email, password) {
  * Fetch authenticated User Profile using JWT token
  */
 export async function fetchUserProfile(token) {
-  const response = await fetch('/api/auth/me', {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -577,7 +552,7 @@ export async function fetchUserProfile(token) {
  * Sync Liked Songs & Playlists to the MongoDB database
  */
 export async function syncUserData(token, likedSongs, playlists) {
-  const response = await fetch('/api/user/sync', {
+  const response = await fetch(`${API_BASE}/api/user/sync`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
