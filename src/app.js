@@ -1,6 +1,6 @@
-import { searchYouTubeSongs, fetchVideoDetails, fetchITunesArtwork, fetchTrendingSongs, formatDuration, authLogin, authSignup, fetchUserProfile, syncUserData, fetchLofiChillSongs, fetch90sNostalgiaSongs } from './api';
-import { PlayerService } from './player';
-import { getKeysStatus, rotateKey, getActiveKeyIndex } from './config';
+import { searchYouTubeSongs, fetchVideoDetails, fetchITunesArtwork, fetchTrendingSongs, formatDuration, authLogin, authSignup, fetchUserProfile, syncUserData, fetchLofiChillSongs, fetch90sNostalgiaSongs } from './api.js';
+import { PlayerService } from './player.js';
+import { getKeysStatus, rotateKey, getActiveKeyIndex } from './config.js';
 
 // ----------------------------------------------------
 // APPLICATION STATE
