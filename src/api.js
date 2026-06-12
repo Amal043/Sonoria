@@ -1,4 +1,4 @@
-import { getActiveKey, rotateKey, YOUTUBE_KEYS } from './config.js';
+import { getActiveKey, rotateKey, YOUTUBE_KEYS } from './config.js?v=1.0.2';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 

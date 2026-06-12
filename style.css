@@ -1937,7 +1937,11 @@ input[type="range"]::-moz-range-thumb:hover {
    ============================================== */
 @media (max-width: 1024px) {
   .app-layout {
-    grid-template-columns: 70px 1fr var(--details-width);
+    grid-template-columns: 70px 1fr 0px;
+  }
+  
+  .details-panel {
+    display: none;
   }
   
   .sidebar-playlists-container, .api-status-card, .logo-text, .nav-item span {
